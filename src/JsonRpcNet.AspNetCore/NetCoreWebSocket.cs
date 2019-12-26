@@ -58,7 +58,7 @@ namespace JsonRpcNet.AspNetCore
                     count: message.Length),
                 messageType: WebSocketMessageType.Text,
                 endOfMessage: true,
-                _cancellation);
+                cancellationToken: _cancellation);
         }
 
         public Task CloseAsync(int code, string reason)
