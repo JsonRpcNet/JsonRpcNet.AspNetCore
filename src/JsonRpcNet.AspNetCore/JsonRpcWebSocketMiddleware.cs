@@ -31,7 +31,7 @@ namespace JsonRpcNet.AspNetCore
             }
             var socket = await context.WebSockets.AcceptWebSocketAsync();
             var netCoreWebsocket = new NetCoreWebSocket(socket, context.RequestAborted);
-            await connectionHandler.HandleMessagesAsync(netCoreWebsocket);
+            await connectionHandler.HandleMessagesAsync(netCoreWebsocket, context.RequestAborted);
         }
     }
 }

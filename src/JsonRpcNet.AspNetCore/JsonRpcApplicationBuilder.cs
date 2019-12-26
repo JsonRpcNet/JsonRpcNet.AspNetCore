@@ -1,14 +1,10 @@
 using System;
-using System.Diagnostics;
 using System.Reflection;
-using System.Text;
 using JsonRpcNet.Attributes;
 using JsonRpcNet.Docs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
-using Newtonsoft.Json;
 
 namespace JsonRpcNet.AspNetCore
 {

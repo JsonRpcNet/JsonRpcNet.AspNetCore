@@ -21,6 +21,7 @@ namespace JsonRpcNet.AspNetCore
             Id = Guid.NewGuid().ToString();
             BeginProcessMessages();
         }
+
         public string Id { get; }
         public IPEndPoint UserEndPoint => null;
 
@@ -65,13 +66,11 @@ namespace JsonRpcNet.AspNetCore
             return _webSocket.CloseAsync((WebSocketCloseStatus)code, reason, _cancellation);
         }
 
-        public Task<(MessageType messageType, ArraySegment<byte> data)> ReceiveAsync()
+        public Task<(MessageType messageType, ArraySegment<byte> data)> ReceiveAsync(CancellationToken cancellation)
         {
-            return _queue.DequeueAsync(_cancellation);
+            return _queue.DequeueAsync(cancellation);
         }
 
-        
-        
         private async void BeginProcessMessages()
         {
             while(_webSocket.State == System.Net.WebSockets.WebSocketState.Open && !_cancellation.IsCancellationRequested)
