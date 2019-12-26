@@ -1,0 +1,29 @@
+name: publish to nuget
+on:
+  push:
+    branches:
+      - master # Your default release branch
+jobs:
+  publish:
+    name: publish to nuget
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2 # This must be >= 2 to compare commits
+
+      # Optional step, add only for a specific dotnet version that doesn't come with ubuntu-latest
+      # For a list of software that comes pre-installed with ubuntu-latest visit bit.ly/2synnZl
+      # - name: Setup dotnet
+      #   uses: actions/setup-dotnet@v1
+      #   with:
+      #     dotnet-version: 3.1.100
+      
+      # Publish
+      - name: Publish if version is updated
+        uses: rohith/publish-nuget@v1
+        with:
+          project_dir: src/JsonRpcNet.AspNetCore
+          tag_format: v* # [*] gets replaced with version
+          nuget_key: ${{secrets.NUGET_API_KEY}} # nuget.org API key
