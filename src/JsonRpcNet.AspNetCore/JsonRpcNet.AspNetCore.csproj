@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <Version>0.1.2</Version>
+        <Version>0.1.3</Version>
         <Authors>JsonRpcNet</Authors>
         <Description>ASP.NET Core integration for JsonRpcNet</Description>
         <PackageProjectUrl>https://github.com/JsonRpcNet</PackageProjectUrl>
@@ -15,7 +15,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="JsonRpcNet.Docs" Version="0.1.2" />
+      <PackageReference Include="JsonRpcNet.Docs" Version="0.1.3" />
       <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
       <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     </ItemGroup>
