@@ -1,7 +1,6 @@
-﻿using JsonRpcNet.Docs;
+﻿using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -58,14 +57,12 @@ namespace JsonRpcNet.AspNetCore.Sample
                     Url = "https://github.com/JsonRpcNet"
                 }
             };
+            
             app.UseJsonRpcApi(info);
             
             app.UseWebSockets();
             app.AddJsonRpcService<ChatJsonRpcWebSocketService>();
-            var doc = new JsonRpcDoc(info);
-            var serviceDoc = DocGenerator.GenerateJsonRpcServiceDoc(typeof(ChatJsonRpcWebSocketService), doc);
-
-            app.Run(async (context) => { await context.Response.WriteAsync("Hello World!"); });
+            Console.WriteLine("Browse jsonrpc api on http://localhost:5000" + info.JsonRpcApiEndpoint);
         }
     }
 }

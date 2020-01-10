@@ -22,7 +22,7 @@ namespace JsonRpcNet.AspNetCore.Sample
         }
 
         [JsonRpcMethod("SendMessageEcho", Description = "Sends a message to the chat and get and echo back")]
-        public async Task<string> EchoMessage(string message)
+        public async Task<string> SendMessageEcho(string message)
         {
             await BroadcastAsync(message);
             return message;

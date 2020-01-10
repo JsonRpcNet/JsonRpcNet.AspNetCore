@@ -12,6 +12,7 @@ namespace JsonRpcNet.AspNetCore.Sample
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseUrls("http://localhost:5000")
                 .UseIISIntegration()
                 .UseStartup<Startup>();
     }
