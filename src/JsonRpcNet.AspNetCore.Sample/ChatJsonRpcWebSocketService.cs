@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using JsonRpcNet.Attributes;
 
@@ -12,30 +13,53 @@ namespace JsonRpcNet.AspNetCore.Sample
     [JsonRpcService("chat", Description = "Chat hub", Name = "ChatService")]
     public class ChatJsonRpcWebSocketService : JsonRpcWebSocketService
     {
-        [JsonRpcNotification("userAdded", Description = "Invoked when user added to chat")]
-        private event EventHandler<UserAddedEventArgs> UserAdded;
-        
-        [JsonRpcMethod("SendMessage", Description = "Sends a message to the chat")]
-        public Task SendMessage(string message)
+        private readonly JsonRpcConnectionManager _connectionManager;
+
+        public ChatJsonRpcWebSocketService() : this(JsonRpcConnectionManager.Default)
         {
-           return BroadcastAsync(message);
+            
         }
 
-        [JsonRpcMethod("SendMessageEcho", Description = "Sends a message to the chat and get and echo back")]
+        public ChatJsonRpcWebSocketService(JsonRpcConnectionManager connectionManager)
+        {
+            _connectionManager = connectionManager;
+        }
+        [JsonRpcNotification(Name = "userAdded", Description = "Invoked when user added to chat")]
+        private event EventHandler<UserAddedEventArgs> UserAdded;
+        
+        [JsonRpcMethod(Name = "SendMessage", Description = "Sends a message to the chat")]
+        public async Task SendMessage(string message)
+        {
+            await Task.WhenAll(
+                _connectionManager
+                    .GetAll<ChatJsonRpcWebSocketService>()
+                    .Where(chat => chat.Id != this.Id)
+                    .Select(chat => chat.SendMessage(message)));
+        }
+
+        [JsonRpcMethod(Name = "SendMessageEcho", Description = "Sends a message to the chat and get and echo back")]
         public async Task<string> SendMessageEcho(string message)
         {
-            await BroadcastAsync(message);
+            await Task.WhenAll(
+                _connectionManager
+                    .GetAll<ChatJsonRpcWebSocketService>()
+                    .Where(chat => chat.Id != this.Id)
+                    .Select(chat => chat.SendMessageEcho(message)));
             return message;
         }
         
-        [JsonRpcMethod("AddUser", Description = "Add a user to the chat")]
+        [JsonRpcMethod(Name = "AddUser", Description = "Add a user to the chat")]
         public void AddUser(AddUserRequest request)
         {
-            BroadcastAsync($"User {request.Name} joined").GetAwaiter().GetResult();
-            UserAdded?.Invoke(this, new UserAddedEventArgs{UserName = request.Name});
+            Task.WhenAll(
+                _connectionManager
+                    .GetAll<ChatJsonRpcWebSocketService>()
+                    .Where(chat => chat.Id != this.Id)
+                    .Select(chat => chat.SendAsync($"User {request.Name} joined")).ToArray())
+                .ContinueWith(t => UserAdded?.Invoke(this, new UserAddedEventArgs{UserName = request.Name}));
         }
 
-        [JsonRpcMethod("GetUsers", Description = "Gets users in the chat")]
+        [JsonRpcMethod(Name = "GetUsers", Description = "Gets users in the chat")]
         public Task<List<User>> GetUsers()
         {
             return

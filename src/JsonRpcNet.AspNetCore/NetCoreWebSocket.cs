@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Net.WebSockets;
 using System.Text;
@@ -51,14 +52,49 @@ namespace JsonRpcNet.AspNetCore
             }
         }
 
-        public Task SendAsync(string message)
+        public async Task SendAsync(byte[] buffer)
         {
-            return _webSocket.SendAsync(buffer: new ArraySegment<byte>(array: Encoding.UTF8.GetBytes(message),
-                    offset: 0, 
-                    count: message.Length),
-                messageType: WebSocketMessageType.Text,
-                endOfMessage: true,
-                cancellationToken: _cancellation);
+            await _webSocket.SendAsync(buffer: new ArraySegment<byte>(array: buffer,
+                        offset: 0,
+                        count: buffer.Length),
+                    messageType: WebSocketMessageType.Text,
+                    endOfMessage: true,
+                    cancellationToken: _cancellation)
+                .ConfigureAwait(false);
+        }
+
+        public async Task SendAsync(string message)
+        {
+            await SendAsync(Encoding.UTF8.GetBytes(message)).ConfigureAwait(false);
+        }
+
+        public async Task SendAsync(Stream stream)
+        {
+            var buffer = new byte[1024];
+            var count = 0;
+            do
+            {
+                count = await stream.ReadAsync(buffer, 0, buffer.Length, _cancellation).ConfigureAwait(false);
+                var endOfMessage = count < buffer.Length || count == 0;
+                await _webSocket.SendAsync(buffer: new ArraySegment<byte>(array: buffer,
+                            offset: 0,
+                            count: count),
+                        messageType: WebSocketMessageType.Text,
+                        endOfMessage: endOfMessage,
+                        cancellationToken: _cancellation)
+                    .ConfigureAwait(false);
+            } while (count > 0);
+        }
+
+        public async Task SendAsync(FileInfo fileInfo)
+        {
+            if (!fileInfo.Exists)
+            {
+                return;
+            }
+
+            var stream = File.OpenRead(fileInfo.FullName);
+            await SendAsync(stream).ConfigureAwait(false);
         }
 
         public Task CloseAsync(int code, string reason)
